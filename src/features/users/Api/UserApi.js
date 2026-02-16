@@ -2,7 +2,7 @@ import ApiService from "@/service/ApiService";
 import { getQueryFormObject } from "@/utils/utils.js";
 
 const api = new ApiService();
-const path = "/users";
+const path = "/auth/users";
 
 // ----------------- EXISTING -----------------
 export function CreateUser(data) {

@@ -27,11 +27,11 @@ defineProps({
       </div>
       
       <!-- Success Icon (hidden for selects) -->
-      <div v-if="!error && validation && !hideSuccessIcon" class="validation-icon success-icon">
+      <!-- <div v-if="!error && validation && !hideSuccessIcon" class="validation-icon success-icon">
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
         </svg>
-      </div>
+      </div> -->
     </div>
 
     <!-- Error Message -->
@@ -57,7 +57,7 @@ defineProps({
 }
 
 .input-label {
-  @apply block text-sm font-semibold text-gray-700 mb-2;
+  @apply block text-sm font-semibold text-white mb-2;
 }
 
 .required-asterisk {
@@ -167,7 +167,7 @@ defineProps({
   outline: none;
   width: 100%;
   background-color: transparent;
-  padding: 0.75rem 1rem;
+padding: 0.75rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: #111827;
@@ -199,21 +199,21 @@ select.skiped-input::-moz-focus-inner {
 /* Adjust padding when slots are present */
 .input-wrapper:has(> *:first-child:not(input):not(select)) .custom-input,
 .input-wrapper:has(> *:first-child:not(input):not(select)) .skiped-input {
-  padding-left: 3rem;
+  padding-left: 1rem;
 }
 
-.input-wrapper:has(> *:last-child:not(input):not(select):not(.select-arrow)) .custom-input,
+/* .input-wrapper:has(> *:last-child:not(input):not(select):not(.select-arrow)) .custom-input,
 .input-wrapper:has(> *:last-child:not(input):not(select):not(.select-arrow)) .skiped-input {
   padding-right: 4rem; /* Extra space for both arrow and slot */
-}
+*/
 
-textarea.custom-input,
+/* textarea.custom-input,
 textarea.skiped-input {
   padding: 0.75rem 1rem;
   resize: none;
   height: 12rem;
   line-height: 1.5;
-}
+} */
 
 .custom-input:focus,
 .skiped-input:focus {
@@ -229,12 +229,12 @@ textarea.skiped-input {
 }
 
 /* Disabled state */
-.custom-input:disabled,
+/* .custom-input:disabled,
 .skiped-input:disabled {
   background-color: #F9FAFB;
   color: #6B7280;
   cursor: not-allowed;
-}
+} */
 </style>
 
 

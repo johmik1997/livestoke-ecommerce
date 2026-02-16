@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useAuth } from "@/stores/auth";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
 import icons from "@/utils/icons";
 import imageSrc from "@/assets/img/profile.png";
 
@@ -15,78 +16,74 @@ const props = defineProps({
   },
 });
 
-// Initialize store and router
+const { locale, t } = useI18n();
 const authStore = useAuth();
 const router = useRouter();
 const isScrolled = ref(false);
 
-// Default profile picture
 const profilePicture = ref(imageSrc);
 
-// Check if user data is available
-const user = authStore?.auth?.user || { name: "Birhane Araya", role: "Marketing Administrator" };
+const user = computed(() => authStore?.auth?.user || { 
+  name: t('defaultUser'), 
+  role: t('defaultRole') 
+});
 
-// Process the profile image
 async function processProfilePicture() {
-  // Log the entire authStore object to inspect
   console.log("authStore:", authStore);
   console.log("authStore.auth:", authStore.auth);
   console.log("authStore.auth.user:", authStore.auth?.user);
   
-  const profilePic = authStore.auth?.user?.profilePicture; // Use profilePicture from user
+  const profilePic = authStore.auth?.user?.profilePicture;
 
-  // Log the profilePicture to inspect it
   console.log("Profile Picture:", profilePic);
 
   if (profilePic) {
-    // If profilePic is a valid base64 string, use it
     if (!profilePic.startsWith("data:image/")) {
       profilePicture.value = `data:image/png;base64,${profilePic}`;
     } else {
       profilePicture.value = profilePic;
     }
   } else {
-    // If no profilePic is available, fallback to the default image
     profilePicture.value = imageSrc;
   }
 }
 
-// Handle image load error and fallback to default image
 function handleImageError() {
   profilePicture.value = imageSrc;
 }
 
-// Handle logout functionality
 function logout() {
   localStorage.removeItem("userDetail");
   window.location.href = "/login";
 }
 
 onMounted(() => {
-  // Process the profile picture when component is mounted
   processProfilePicture();
-  // Handle scroll event to toggle navbar style
   window.addEventListener('scroll', () => {
     isScrolled.value = window.scrollY > 10;
   });
 });
 
-// Watch for changes in input data (if any)
 const inputData = ref("");
 const emit = defineEmits(["update:modelValue"]);
 watch(inputData, () => {
   emit("update:modelValue", inputData.value);
 });
 
-// Toggle user menu dropdown visibility
 const showUserMenu = ref(false);
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;
 };
 
-// Navigate to previous page (back button)
 const goBack = () => {
   router.go(-1);
+};
+
+// Language switching
+const availableLocales = ['en', 'am'];
+const switchLanguage = (lang) => {
+  locale.value = lang;
+  localStorage.setItem('locale', lang);
 };
 
 // Navigate to Profile or Settings page
@@ -94,43 +91,77 @@ const navigateTo = (page) => {
   if (page === "profile") {
     router.push('/profile'); 
   } else if (page === "settings") {
-    router.push('/SettingsPage'); 
+    router.push('/settings'); 
   }
+  showUserMenu.value = false;
 };
+
+// Translated texts
+const pageTitle = computed(() => {
+  return props.title || t('defaultTitle');
+});
 </script>
 
 <template>
-  <div class="flex justify-between items-center bg-gray-50 relative">
+  <div class="flex justify-between items-center bg-stone-50 relative">
     <!-- Left Side - Back Button and Title -->
     <div class="flex items-center gap-2 sm:gap-4">
       <button 
         @click="goBack" 
-        class="p-2 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+        class="p-2 hover:bg-amber-50 rounded-lg flex items-center gap-2 transition-colors group"
+        :aria-label="t('goBack')"
       >
         <span class="item-center">
           <svg width="7" height="13" viewBox="0 0 7 13" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path opacity="0.6" fill-rule="evenodd" clip-rule="evenodd"
               d="M5.82539 1.0134C6.03505 1.20471 6.05933 1.54072 5.87962 1.76391L2.15854 6.38525L5.87962 11.0066C6.05933 11.2298 6.03505 11.5658 5.82539 11.7571C5.61572 11.9484 5.30007 11.9226 5.12036 11.6994L1.12037 6.73164C0.959876 6.53232 0.959876 6.23819 1.12037 6.03887L5.12036 1.07113C5.30008 0.847943 5.61572 0.822096 5.82539 1.0134Z"
-              fill="#263558" stroke="#263558" stroke-linecap="round" 
+              fill="#92400E" stroke="#92400E" stroke-linecap="round" 
+              class="group-hover:fill-amber-700 group-hover:stroke-amber-700"
             />
           </svg>
         </span>
-        
       </button>
-      <span class="capitalize text-base sm:text-lg font-bold truncate">{{ props.title }}</span>
+      <span class="capitalize text-base sm:text-lg font-bold truncate text-stone-800">{{ pageTitle }}</span>
     </div>
 
     <!-- Right Side - User Info and Icons -->
     <div class="flex gap-2 sm:gap-4 items-center">
+      <!-- Language Switcher -->
+      <div class="flex gap-1 border border-amber-200 rounded-lg overflow-hidden">
+        <button 
+          v-for="lang in availableLocales" 
+          :key="lang"
+          @click="switchLanguage(lang)" 
+          :class="[
+            'px-2 py-1 text-sm font-medium transition-colors',
+            locale === lang 
+              ? 'bg-amber-600 text-white' 
+              : 'bg-white text-stone-600 hover:bg-amber-50'
+          ]"
+          :aria-label="t(`language.${lang}`)"
+        >
+          {{ lang === 'en' ? 'EN' : 'አማ' }}
+        </button>
+      </div>
+
       <!-- Icons - Hidden on mobile, visible on tablet and up -->
       <div class="hidden sm:flex gap-4 items-center">
-        <button class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <button 
+          class="p-2 hover:bg-amber-100 rounded-full transition-colors text-stone-600 hover:text-amber-700"
+          :aria-label="t('notifications')"
+        >
           <i v-html="icons.notification" />
         </button>
-        <button class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <button 
+          class="p-2 hover:bg-amber-100 rounded-full transition-colors text-stone-600 hover:text-amber-700"
+          :aria-label="t('messages')"
+        >
           <i v-html="icons.message" />
         </button>
-        <button class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <button 
+          class="p-2 hover:bg-amber-100 rounded-full transition-colors text-stone-600 hover:text-amber-700"
+          :aria-label="t('bire')"
+        >
           <i v-html="icons.bire" />
         </button>
       </div>
@@ -139,48 +170,70 @@ const navigateTo = (page) => {
       <div class="relative">
         <button 
           @click="toggleUserMenu"
-          class="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          class="flex items-center gap-2 p-2 hover:bg-amber-100 rounded-lg transition-colors group"
+          :aria-label="t('userMenu')"
+          :aria-expanded="showUserMenu"
         >
-           <div class="relative">
-            <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-white shadow">
+          <div class="relative">
+            <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-amber-200 shadow">
               <img
                 :src="profilePicture || imageSrc"
-                alt="User avatar"
+                :alt="t('userAvatar')"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 @error="handleImageError"
               />
             </div>
-            <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-ping"></span>
+            <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white animate-ping"></span>
           </div>
           <!-- User Info - Hidden on mobile -->
           <div class="hidden sm:block text-right">
-            <p class="font-Poppin text-sm">{{ user.name }}</p>
-            <p class="text-xs text-gray-500">{{ user.role }}</p>
+            <p class="font-Poppin text-sm text-stone-800">{{ user.name }}</p>
+            <p class="text-xs text-amber-700">{{ user.role }}</p>
           </div>
           
-          <i v-html="icons.down" class="transition-transform duration-200" 
+          <i v-html="icons.down" class="transition-transform duration-200 text-stone-600 group-hover:text-amber-700" 
              :class="{ 'rotate-180': showUserMenu }" />
         </button>
 
         <!-- Dropdown Menu -->
         <div v-if="showUserMenu" 
-             class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+             class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-amber-200"
+             role="menu"
+             :aria-label="t('userMenu')"
+        >
           <!-- Mobile-only icons -->
-          <div class="sm:hidden border-b border-gray-100">
-            <button class="w-36 px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
+          <div class="sm:hidden border-b border-amber-100">
+            <button 
+              class="w-full px-4 py-2 text-left hover:bg-amber-50 flex items-center gap-2 text-stone-700 hover:text-amber-700"
+              role="menuitem"
+            >
               <i v-html="icons.notification" />
-              <span>Notifications</span>
+              <span>{{ t('notifications') }}</span>
             </button>
-            <button class="w-36 px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
+            <button 
+              class="w-full px-4 py-2 text-left hover:bg-amber-50 flex items-center gap-2 text-stone-700 hover:text-amber-700"
+              role="menuitem"
+            >
               <i v-html="icons.message" />
-              <span>Messages</span>
+              <span>{{ t('messages') }}</span>
             </button>
           </div>
           
           <!-- Common menu items -->
-          <button @click="navigateTo('profile')" class="w-36 px-4 py-2 text-left hover:bg-gray-50">Profile</button>
-          <!-- <button @click="navigateTo('settings')" class="w-36 px-4 py-2 text-left hover:bg-gray-50">Settings</button> -->
-          <button  @click="logout()" class=" px-4 w-36 py-2 text-left hover:bg-red-50 text-red-600">Logout</button>
+          <button 
+            @click="navigateTo('profile')" 
+            class="w-full px-4 py-2 text-left hover:bg-amber-50 text-stone-700 hover:text-amber-700"
+            role="menuitem"
+          >
+            {{ t('profile') }}
+          </button>
+          <button 
+            @click="logout()" 
+            class="w-full px-4 py-2 text-left hover:bg-amber-50 text-red-600 hover:text-red-700"
+            role="menuitem"
+          >
+            {{ t('logout') }}
+          </button>
         </div>
       </div>
     </div>
@@ -188,7 +241,8 @@ const navigateTo = (page) => {
     <!-- Overlay for closing dropdown -->
     <div v-if="showUserMenu" 
          @click="showUserMenu = false"
-         class="fixed inset-0 z-40 bg-black bg-opacity-20">
+         class="fixed inset-0 z-40"
+         :aria-label="t('closeMenu')">
     </div>
   </div>
 </template>
@@ -203,5 +257,10 @@ const navigateTo = (page) => {
   .truncate {
     max-width: 150px;
   }
+}
+
+/* Amharic text support */
+:lang(am) {
+  font-family: 'Noto Sans Ethiopic', 'Nyala', 'Abyssinica SIL', sans-serif;
 }
 </style>

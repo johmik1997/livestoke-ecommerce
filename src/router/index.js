@@ -3,21 +3,18 @@ import MainLayout from '@/layouts/MainLayout.vue';
 import { useAuth } from '@/stores/auth';
 
 // Lazy-loaded page components
-const Dashboard = () => import('@/features/dashboard/pages/Dashboard.vue');
+const Dashboard = () => import('@/features/buyer/pages/BuyerDashboard.vue');
 const Login = () => import('@/pages/login/Login.vue');
 const SignUp = () => import('@/pages/signUp.vue');
 
-// Route modules (keep static, they contain route definitions)
-import membersRoutes from "./members.routes";
+// Add this route in the children array
+
 import rolesRoutes from './roles.routes';
 import privilagesRoutes from './privilages.routes';
 import usersRoutes from './users.routes';
 import profileRoutes from './profile.routes';
-import quotationRoutes from './quatation.routes';
-import paymentRoutes from './payment.routes';
-import insuranceRoutes from './insurance.routes';
-import carSpecificationsRoutes from './carSpecifications.routes';
-import premiumRoutes from './premium.routes';
+import BuyerRoute from './buyrer.routes';
+import sellerRoute from "./seller.route";
 
 const routes = [
   {
@@ -28,16 +25,15 @@ const routes = [
     children: [
       { path: "", redirect: "/dashboard" },
       { path: "/dashboard", name: "dashboard", component: Dashboard, meta: { requiresAuth: true } },
-      ...membersRoutes,
+      
+      
+      // Include other route modules
       ...rolesRoutes,
       ...privilagesRoutes,
       ...usersRoutes,
       ...profileRoutes,
-      ...quotationRoutes,
-      ...paymentRoutes,
-      ...insuranceRoutes,
-      ...carSpecificationsRoutes,
-      ...premiumRoutes,
+      ...BuyerRoute,
+      ...sellerRoute
     ],
   },
   { path: "/login", name: "Login", component: Login },
@@ -56,17 +52,21 @@ router.beforeEach(async (to, from) => {
   if (!auth.auth?.accessToken) {
     let detail = localStorage.getItem('userDetail');
     if (detail) {
-      detail = JSON.parse(detail);
-      auth.setAuth({
-        user: detail,
-        accessToken: detail?.token,
-      });
+      try {
+        detail = JSON.parse(detail);
+        auth.setAuth({
+          user: detail,
+          accessToken: detail?.token,
+        });
+      } catch (e) {
+        console.error("Failed to parse user detail", e);
+      }
     }
   }
 
   // If going to login and already authenticated, redirect back
   if (to.path == '/login' && auth.auth?.accessToken) {
-    return { path: from.path };
+    return { path: from.path || '/dashboard' };
   }
 
   // If no authentication and trying to access protected route
@@ -100,7 +100,7 @@ router.beforeEach(async (to, from) => {
   }
 
   // Privilege-based access
-  const privileges = auth.auth.user?.privileges;
+  const privileges = auth.auth.user?.privileges || [];
   const found = (to.meta?.privileges || []).find((privilege) => {
     return privileges?.includes(`ROLE_${privilege}`);
   });
@@ -111,6 +111,3 @@ router.beforeEach(async (to, from) => {
 });
 
 export default router;
-
-
-

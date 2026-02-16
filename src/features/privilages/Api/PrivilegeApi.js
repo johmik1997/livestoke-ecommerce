@@ -2,7 +2,7 @@ import ApiService from "@/service/ApiService";
 import { getQueryFormObject } from "@/utils/utils.js";
 
 const api = new ApiService();
-const path = "";
+const path = "/auth/users";
 
 export function getAllPrivilege(query = {}) {
   const qr = getQueryFormObject(query);

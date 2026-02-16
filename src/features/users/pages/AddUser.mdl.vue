@@ -74,11 +74,6 @@ function create({ values }) {
         
         <Input name="mobilePhone" label="Mobile Phone" validation="required|phone"
           :attributes="{ placeholder: 'Enter Mobile Phone' }" />
-        <Select name="userType" label="User Type" validation="required"
-          :options="['Admin', 'Client', 'Insurance', 'Bank', 'Agent']"
-          :attributes="{ placeholder: 'Select User Type',
-            required
-           }" />
         <Select :obj="true" name="roleUuid" label="Role" validation="required"
           :options="(rolereq.response.value?.roles?.content || []).map(role => ({
             label: role.roleName,

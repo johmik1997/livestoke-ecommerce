@@ -29,13 +29,7 @@ const toggleDropdown = async (navPath, event) => {
   await nextTick();
   
   if (!openDropdowns.value.has(navPath)) {
-    // If we're opening the payment dropdown, just add it without removing others
-    if (navPath === '/payment') {
-      openDropdowns.value.add(navPath);
-    } else {
-      // For other dropdowns, close all and open only this one
-      openDropdowns.value = new Set([navPath]);
-    }
+    openDropdowns.value = new Set([navPath]);
   } else {
     // Toggle off the dropdown when clicked again
     openDropdowns.value.delete(navPath);
@@ -54,43 +48,6 @@ watch(() => route.path, (newPath, oldPath) => {
   // Extract the base paths for comparison
   const newPathBase = newPath.split('/')[1];
   const oldPathBase = oldPath?.split('/')[1];
-  
-  // Handle payment section specially
-  if (newPathBase === 'payment') {
-    // Always keep payment dropdown open when in payment section
-    openDropdowns.value.add('/payment');
-    
-    // Check if we're in a specific payment subsection
-    if (newPath.includes('/deposit') || newPath.includes('/depositdetails/')) {
-      // Keep deposit dropdown open
-      openDropdowns.value.add('/payment/deposit');
-    } else if (newPath.includes('/premium') || newPath.includes('/premiumdetails/')) {
-      // Keep premium dropdown open
-      openDropdowns.value.add('/payment/premium');
-    } else if (newPath.includes('/dispersement') || newPath.includes('/dispersementdetails/')) {
-      // Keep dispersement dropdown open
-      openDropdowns.value.add('/payment/dispersement');
-    }
-    return;
-  }
-  
-  // Handle quotation section
-  if (newPathBase === 'quatation' || newPath.includes('/quatation/details/')) {
-    // Keep quotation dropdown open
-    if (navs.some(nav => nav.path === '/quatation' && nav.children)) {
-      openDropdowns.value.add('/quatation');
-    }
-    return;
-  }
-  
-  // Handle insurance section
-  if (newPathBase === 'insurance' || newPath.includes('/insurance/detail/')) {
-    // Keep insurance dropdown open
-    if (navs.some(nav => nav.path === '/insurance' && nav.children)) {
-      openDropdowns.value.add('/insurance');
-    }
-    return;
-  }
   
   // Only close dropdowns when navigating to a completely different section
   if (newPathBase !== oldPathBase) {
@@ -141,53 +98,7 @@ const isRouteActive = (navPath) => {
   const currentPath = route.path.toLowerCase();
   const baseNavPath = navPath.toLowerCase();
 
-  // Handle financing routes
-  if (baseNavPath === '/payment') {
-    // Check if we're in any financing-related route
-    return currentPath.startsWith('/payment') || 
-           currentPath.includes('/depositdetails/') || 
-           currentPath.includes('/premiumdetails/') ||
-           currentPath.includes('/dispersementdetails/');
-  }
-
-  // Handle deposit routes specifically
-  if (baseNavPath === '/payment/deposit') {
-    return currentPath === '/payment/deposit' || 
-           currentPath.startsWith('/payment/deposit/details/') || 
-           currentPath.includes('/depositdetails/');
-  }
-
-  // Handle premium routes
-  if (baseNavPath === '/payment/premium') {
-    return currentPath === '/payment/premium' || 
-           currentPath.includes('/premiumdetails/');
-  }
-
-  // Handle dispersement routes
-  if (baseNavPath === '/payment/dispersement') {
-    return currentPath === '/payment/dispersement' || 
-           currentPath.includes('/dispersementdetails/');
-  }
-
-  // Handle quotation routes
-  if (baseNavPath === '/quatation') {
-    return currentPath === '/quatation' || 
-           currentPath.includes('/quatation/details/');
-  }
-  
-  // Handle insurance routes
-  if (baseNavPath === '/insurance') {
-    return currentPath === '/insurance' || 
-           currentPath.includes('/insurance/detail/');
-  }
-  
-  // Handle drafts
-  if (baseNavPath === '/drafts') {
-    return currentPath === '/drafts';
-  }
-
   // Default case - check if current path starts with the nav path
-  // This helps with detail pages that extend the base path
   return currentPath === baseNavPath || 
          (baseNavPath !== '/' && currentPath.startsWith(baseNavPath + '/'));
 };
@@ -214,40 +125,6 @@ const shouldShowNavItem = (nav) => {
 
   return true;
 };
-
-// Initialize dropdowns based on current route
-const initializeDropdowns = () => {
-  const currentPath = route.path.toLowerCase();
-  
-  // Payment section
-  if (currentPath.startsWith('/payment')) {
-    openDropdowns.value.add('/payment');
-    
-    // Check specific payment subsections
-    if (currentPath.includes('/deposit') || currentPath.includes('/depositdetails/')) {
-      openDropdowns.value.add('/payment/deposit');
-    } else if (currentPath.includes('/premium') || currentPath.includes('/premiumdetails/')) {
-      openDropdowns.value.add('/payment/premium');
-    } else if (currentPath.includes('/dispersement') || currentPath.includes('/dispersementdetails/')) {
-      openDropdowns.value.add('/payment/dispersement');
-    }
-  }
-  
-  // Quotation section
-  if (currentPath.startsWith('/quatation') || currentPath.includes('/quatation/details/')) {
-    openDropdowns.value.add('/quatation');
-  }
-  
-  // Insurance section
-  if (currentPath.startsWith('/insurance') || currentPath.includes('/insurance/detail/')) {
-    openDropdowns.value.add('/insurance');
-  }
-};
-
-// Call initialization on component mount
-onMounted(() => {
-  initializeDropdowns();
-});
 </script>
 
 <template>
@@ -255,11 +132,11 @@ onMounted(() => {
     <!-- Mobile Menu Button -->
     <button 
       @click="toggleMobileMenu"
-      class="lg:hidden fixed top-4 left-4 z-50 p-3 rounded-lg bg-white shadow-lg border border-gray-200"
+      class="lg:hidden fixed top-4 left-4 z-50 p-3 rounded-lg bg-white shadow-lg border border-amber-200"
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        class="h-5 w-5 text-[#3C3C9E] transition-transform duration-300" 
+        class="h-5 w-5 text-amber-700 transition-transform duration-300" 
         :class="{ 'rotate-90': isMobileMenuOpen }"
         fill="none" 
         viewBox="0 0 24 24" 
@@ -276,20 +153,23 @@ onMounted(() => {
 
     <!-- Sidebar -->
     <div 
-      class="__scrollable-hidden fixed lg:relative w-full sm:w-80 lg:w-[20%] border-r text-white bg-[#3C3C9E] overflow-y-scroll h-full transition-transform duration-300 ease-in-out z-40"
+      class="__scrollable-hidden fixed lg:relative w-full sm:w-80 lg:w-[20%] border-r text-amber-50 bg-gradient-to-b from-amber-800 to-amber-900 overflow-y-scroll h-full transition-transform duration-300 ease-in-out z-40 shadow-xl"
       :class="{ 
         '-translate-x-full lg:translate-x-0': !isMobileMenuOpen,
         'translate-x-0': isMobileMenuOpen 
       }"
     >
       <!-- Logo Header -->
-      <div class="p-4 px-6 h-16 flex gap-4 items-center sticky top-0 bg-[#3C3C9E] z-10 border-b border-white/10">
-        <i v-html="icons.cbhi_logo" class="w-8 h-8" />
-       
+      <div class="p-4 px-6 h-20 flex gap-4 items-center sticky top-0 bg-amber-900 z-10 border-b border-amber-700/30">
+        <div 
+          v-html="icons.logo" 
+          class="w-48 h-36 flex items-center text-amber-100"
+        ></div>
+
         <!-- Close button for mobile -->
         <button 
           @click="toggleMobileMenu"
-          class="lg:hidden ml-auto p-1 rounded hover:bg-white/10"
+          class="lg:hidden ml-auto p-1 rounded hover:bg-amber-800/50 text-amber-200"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -302,23 +182,22 @@ onMounted(() => {
         <!-- Loop through grouped navigation items -->
         <div v-for="(navItems, category) in grouped" :key="category" class="flex flex-col gap-3">
           <!-- Category Header -->
-          <h3 class="text-xs font-semibold opacity-70 uppercase tracking-wider pt-4 first:pt-0">{{ category }}</h3>
+          <h3 class="text-xs font-semibold opacity-70 uppercase tracking-wider pt-4 first:pt-0 text-amber-300/70">{{ category }}</h3>
           
           <!-- Navigation Items -->
           <div v-for="nav in navItems" :key="nav.name" class="flex flex-col">
             <!-- Parent Nav Item -->
             <div v-if="shouldShowNavItem(nav)" 
-                 class="flex rounded-lg transition-all duration-200 ease-linear hover:text-[#3C3C9E] hover:bg-white"
+                 class="flex rounded-lg transition-all duration-200 ease-linear hover:bg-amber-700/50"
                  :class="{ 
-                   'bg-white/10 text-white': isRouteActive(nav.path) && nav.children && nav.path !== '/payment',
-                   'bg-white/20 text-white font-semibold': isRouteActive(nav.path) && nav.path === '/payment'
+                   'bg-amber-700/30 text-amber-100': isRouteActive(nav.path)
                  }">
               <RouterLink
                 v-if="!nav.children"
                 :to="nav.path"
                 class="w-full rounded-lg"
                 :class="{
-                  'bg-white text-[#3C3C9E] shadow-sm': isRouteActive(nav.path),
+                  'bg-amber-600 text-white shadow-md': isRouteActive(nav.path),
                   'router-link-active': isRouteActive(nav.path)
                 }"
                 @click="isMobileMenuOpen = false"
@@ -336,8 +215,8 @@ onMounted(() => {
                 v-else
                 class="flex-1 flex justify-between items-center px-4 py-3 cursor-pointer rounded-lg"
                 :class="{
-                  'bg-white text-[#3C3C9E] shadow-sm': isRouteActive(nav.path) && nav.path !== '/payment',
-                  'bg-white/10 text-white hover:bg-white hover:text-[#3C3C9E] font-semibold': isRouteActive(nav.path) && nav.path === '/payment'
+                  'bg-amber-600 text-white shadow-md': isRouteActive(nav.path),
+                  'hover:bg-amber-700/50': !isRouteActive(nav.path)
                 }"
                 @click.stop="(event) => toggleDropdown(nav.path, event)"
               >
@@ -369,15 +248,15 @@ onMounted(() => {
                 :to="child.path"
                 class="block ml-8 text-left child-link h-11 flex items-center rounded-lg"
                 :class="{
-                  'bg-white text-[#3C3C9E] shadow-sm': isRouteActive(child.path),
+                  'bg-amber-600 text-white shadow-md': isRouteActive(child.path),
                   'router-link-active': isRouteActive(child.path)
                 }"
                 @click="isMobileMenuOpen = false"
               >
                 <div 
-                  class="flex items-center w-full justify-start text-left px-4 py-2 hover:text-[#3C3C9E] hover:bg-white/10 cursor-pointer rounded-lg transition-colors"
+                  class="flex items-center w-full justify-start text-left px-4 py-2 hover:bg-amber-700/50 cursor-pointer rounded-lg transition-colors text-amber-100"
                   :class="{
-                    'bg-white text-[#3C3C9E]': isRouteActive(child.path),
+                    'bg-amber-600 text-white': isRouteActive(child.path),
                     'font-semibold': isRouteActive(child.path)
                   }"
                 >
@@ -400,7 +279,7 @@ onMounted(() => {
     <!-- Main content -->
     <div class="flex flex-col w-full lg:w-[80%] min-h-screen">
       <!-- Navbar -->
-      <div class="navbar-height flex items-center px-4 sm:px-6 py-2 bg-white border-b border-gray-200">
+      <div class="navbar-height flex items-center px-4 sm:px-6 py-2 bg-white border-b border-amber-200">
         <NavBar 
           v-model="search" 
           class="w-full" 
@@ -409,7 +288,7 @@ onMounted(() => {
       </div>
       
       <!-- Main Content Area -->
-      <div class="__scrollable-hidden flex-1 bg-base-clr2 overflow-y-auto">
+      <div class="__scrollable-hidden flex-1 bg-stone-50 overflow-y-auto">
         <div class="p-4 sm:p-6">
           <RouterView :search="search" :inputData="inputData" />
         </div>
@@ -439,8 +318,8 @@ onMounted(() => {
 
 /* Active route styling */
 .__scrollable-hidden .router-link-active {
-  background-color: white !important;
-  color: #3C3C9E !important;
+  background-color: #D97706 !important; /* amber-600 */
+  color: white !important;
 }
 
 .__scrollable-hidden .router-link-active .nav-button {
@@ -479,5 +358,3 @@ onMounted(() => {
   }
 }
 </style>
-
-

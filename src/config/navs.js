@@ -1,202 +1,118 @@
 import icons from "@/utils/icons";
 
 export default [
+  // Analytics / Dashboard
   {
     path: "/dashboard",
     icon: icons.dashboard,
     name: "Dashboard",
-    meta: {
-      requiresAuth: true,
-      permissions: [],
-    },
     type: "Analytics",
-    privilage: ['read_user'],
-  },
-  // {
-  //   path: "/a",
-  //   icon: icons.report,
-  //   name: "Report and analytics",
-  //   meta: {
-  //     requiresAuth: true,
-  //     permissions: [],
-  //   },
-  //   type: "Analytics",
-  // },
-  {
-    path: '/drafts',
-    icon: icons.leeds,
-    name: 'Leads (Drafts)',
-    meta: {
-      requiresAuth: true,
-      permissions: []
-    },
-    type: "Pages",
-    privilage: ['create_car'],
-  },
-    {
-    path: '/draftsForClient',
-    icon: icons.leeds,
-    name: 'Leads (Drafts)',
-    meta: {
-      requiresAuth: true,
-      permissions: []
-    },
-    type: "Pages",
-    privilage: [ 'create_car_collection'],
-  },
-  {
-    path: '/clients',
-    icon: icons.renew,
-    name: 'Clients',
-    meta: {
-      requiresAuth: true,
-      permissions: []
-    },
-    type: "Pages",
-    privilage: ['read_user'],
-  },
-  {
-    path: '/quatation',
-    icon: icons.quotation,
-    name: 'Quotations',
-    meta: {
-      requiresAuth: true,
-      permissions: [],
-    },
-    type: "Pages",
-    privilage: ['create_car'],
-  },
-    {
-    path: '/createQuotation',
-    icon: icons.quotation,
-    name: 'Create Quotations',
-    meta: {
-      requiresAuth: true,
-      permissions: [],
-    },
-    type: "Pages",
-    privilage: ['create_car_collection'],
+    privilage: ['access_buyer'], // Available to all authenticated users
   },
   
+  // Buyer Navigation
   {
-    path: '/payment',
-    icon: icons.payment,
-    name: 'Financing',
-    meta: {
-      requiresAuth: true,
-      permissions: [],
-    },
-    type: "Pages",
-    isOpen: false, // Add this to control dropdown state
-    privilage: ['create_payement'],
+    path: "/buyer/browse",
+    icon: icons.browse || "🔍",
+    name: "Browse Oxen",
+    type: "Marketplace",
+    privilage: ['access_buyer'],
+  },
+  {
+    path: "/buyer/favorites",
+    icon: icons.heart || "❤️",
+    name: "My Favorites",
+    type: "Marketplace",
+    privilage: ['access_buyer'],
+  },
+  {
+    path: "/buyer/orders",
+    icon: icons.orders || "📦",
+    name: "My Orders",
+    type: "Marketplace",
+    privilage: ['access_buyer'],
+  },
+  
+
+  // Seller Navigation (if you have seller features)
+  {
+    path: "/seller/dashboard",
+    icon: icons.seller || "🏪",
+    name: "Seller Dashboard",
+    type: "Seller",
+    privilage: ['access_seller'], 
+  },
+  {
+    path: "/seller/my-oxen",
+    icon: icons.oxen || "🐂",
+    name: "My Oxen",
+    type: "Seller",
+    privilage: ['access_seller'],
+  },
+  {
+    path: "/seller/add-ox",
+    icon: icons.add || "➕",
+    name: "Add New Ox",
+    type: "Seller",
+    privilage: ['access_seller'],
+  },
+  {
+    path: "/seller/orders",
+    icon: icons.orders || "📦",
+    name: "Seller Orders",
+    type: "Seller",
+    privilage: ['access_seller'],
+  },
+
+
+  // Payment & Finance
+  {
+    path: "/payment",
+    icon: icons.payment || "💳",
+    name: "Payments",
+    type: "Finance",
+    privilage: [],
     children: [
       {
-        path: '/payment/deposit',
-        name: 'Deposit',
-        meta: {
-          requiresAuth: true,
-          permissions: []
-        },
-        privilage: ['createpayment'],
+        path: "/payment/methods",
+        name: "Payment Methods",
+        privilage: [],
       },
       {
-        path: '/payment/dispersement',
-        name: 'Pay For Insurances',
-        meta: {
-          requiresAuth: true,
-          permissions: []
-        }
+        path: "/payment/transactions",
+        name: "Transaction History",
+        privilage: [],
       },
       {
-        path: '/payment/premium',
-        name: 'Premium Payment',
-        meta: {
-          requiresAuth: true,
-          permissions: []
-        }
-      }
-    ]
+        path: "/payment/invoices",
+        name: "Invoices",
+        privilage: [],
+      },
+    ],
   },
-  // {
-  //   path: '/policies',
-  //   icon: icons.policies,
-  //   name: 'policies',
-  //   meta: {
-  //     requiresAuth: true,
-  //     permissions: []
-  //   },
-  //   type: "Pages",
-  //   privilage: ['create_policies'],
-  // },
+
+
+
+  // Admin Settings (privilege-protected)
   {
-    path: '/insurance',
-    icon: icons.transfer,
-    name: 'Insurances',
-    meta: {
-      requiresAuth: true,
-      permissions: [],
-    },
-    type: "Pages",
-    privilage: ['create_insurance'],
-  },
-    {
-    path: '/car_specifications',
-    icon: icons.car,
-    name: 'Car Specifications',
-    meta: {
-      requiresAuth: true,
-      permissions: [],
-    },
-    type: "Pages",
-    privilage: ['create_specification'],
-  },
-    {
-    path: '/premium',
-    icon: icons.premium,
-    name: 'Premium',
-    meta: {
-      requiresAuth: true,
-      permissions: [],
-    },
-    type: "Pages",
-    privilage: ['create_premium'],
-  },
-  {
-    path: '/Users',
-    name: 'Users',
+    path: "/users",
+    name: "Users",
     icon: icons.users,
-    meta: {
-      requiresAuth: true,
-      permissions: []
-    },
-    type: "Settings",
-    privilage: ['create_user'],
+    type: "Administration",
+    privilage: ['create_user', 'manage_users'],
   },
   {
-    path: '/privileges',
-    name: 'Privileges',
+    path: "/privileges",
+    name: "Privileges",
     icon: icons.privilege,
-    meta: {
-      requiresAuth: true,
-      permissions: []
-    },
-    type: "Settings",
-    privilage: ['create_privilege'],
+    type: "Administration",
+    privilage: ['manage_privileges'],
   },
   {
-    path: '/roles',
-    name: 'Roles',
+    path: "/roles",
+    name: "Roles",
     icon: icons.role,
-    meta: {
-      requiresAuth: true,
-      permissions: []
-    },
-    type: "Settings",
-    privilage: ['create_role'],
-  }
+    type: "Administration",
+    privilage: ['manage_roles'],
+  },
 ];
-
-
-
-
-
